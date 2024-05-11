@@ -23,6 +23,26 @@ async function createUser(req, res) {
     }
 }
 
+async function login(req, res) {
+    try {
+        const user = await UserService.login({
+            email: req.body.email,
+            password: req.body.password
+        });
+        SuccessResponse.data = user;
+        return res
+            .status(StatusCodes.CREATED)
+            .json(SuccessResponse)
+    } catch (error) {
+        console.log(error)
+        ErrorResponse.error = error;
+        return res
+            .status(error.statusCode)
+            .json(ErrorResponse)
+    }
+}
+
 module.exports = {
-    createUser
+    createUser,
+    login
 }
