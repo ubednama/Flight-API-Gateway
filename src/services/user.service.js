@@ -43,7 +43,32 @@ async function login(data) {
     }
 }
 
+async function isAuthenticated(token) {
+    try {
+        if(!token) {
+            throw new AppError('Missing JWT token', StatusCodes.BAD_REQUEST)
+        }
+        const response = Auth.verifyToken(token);
+        const user =  await userRepository.getUserByEmail(response.email)
+        if(!user) {
+            throw new AppError("User doesn't exists", StatusCodes.NOT_FOUND)
+        }
+        return user.id
+    } catch (error) {
+        if (error instanceof AppError) throw error;
+        if (error.name == 'JsonWebTokenError') {
+            throw new AppError('Invalid JWT token', StatusCodes.BAD_REQUEST);
+        }
+        if(error.name == 'TokenExpiredError') {
+            throw new AppError('JWT token Expired', StatusCodes.BAD_REQUEST);
+        }
+        console.log(error)
+        throw new AppError('Something went wrong', StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
 module.exports = {
     createUser,
-    login
+    login,
+    isAuthenticated
 }
