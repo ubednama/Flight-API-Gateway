@@ -32,21 +32,3 @@ function compareTime(timeAhead, timeBehind, upperLimit, lowerLimit) {
 module.exports = {
     compareTime
 }
-
-
-
-
-
-
-
-    // if(upperLimit && lowerLimit) {
-    //     return dateTimeAhead.getTime() > dateTimeBehind.getTime() && dateTimeAhead.getTime() - dateTimeBehind.getTime() <= upperLimit && dateTimeAhead.getTime() && dateTimeBehind.getTime() >= lowerLimit
-    // }
-
-    // if(lowerLimit) {
-    //     return dateTimeAhead.getTime() > dateTimeBehind.getTime() && dateTimeAhead.getTime() - dateTimeBehind.getTime() >= lowerLimit
-    // }
-
-    // if(upperLimit) {
-    //     return dateTimeAhead.getTime() > 
-    // }
