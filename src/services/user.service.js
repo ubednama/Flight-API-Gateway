@@ -1,14 +1,18 @@
 const { StatusCodes } = require('http-status-codes')
-const { UserRepository } = require("../repositories");
+const { UserRepository, RoleRepository } = require("../repositories");
 const AppError = require("../utils/errors/app.error");
-const { Auth } = require('../utils/common');
+const { Auth, Enums } = require('../utils/common');
 
 const userRepository = new UserRepository();
+const roleRepository = new RoleRepository();
 
 async function createUser(data) {
     try {
-        const response = await userRepository.create(data)
-        return response
+        const user = await userRepository.create(data)
+        const role = await roleRepository.getRoleByName(Enums.USER_ROLES_ENUMS.CUSTOMER)
+        user.addRole(role);
+        return user
+
     } catch (error) {
         if(error.name == 'SequelizeValidationError' || error.name == 'SequelzeUniqueConstraintError') {
             let desc = [];
@@ -67,8 +71,48 @@ async function isAuthenticated(token) {
     }
 }
 
+async function addRoleToUser(data) {
+    try {
+        const user = await userRepository.get(data.id)
+        if(!user) {
+            throw new AppError("User doesn't exists", StatusCodes.NOT_FOUND)
+        }
+        const role = await roleRepository.getRoleByName(data.role)
+        if(!role) {
+            throw new AppError("No user found for given role", StatusCodes.NOT_FOUND)
+        }
+        user.addRole(role);
+        return user
+    } catch (error) {
+        if (error instanceof AppError) throw error;
+        console.log(error)
+        throw new AppError('Something went wrong', StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
+async function isAdmin(id) {
+    try{
+        const user = await userRepository.get(id);
+        if(!user) {
+            throw new AppError("User doesn't exists", StatusCodes.NOT_FOUND)
+        }
+        const adminRole = await roleRepository.getRoleByName(Enums.USER_ROLES_ENUMS.ADMIN)
+        if(!adminRole) {
+            throw new AppError("No user found for given role", StatusCodes.NOT_FOUND)
+        }
+        return user.hasRole(adminRole);
+    } catch(error) {
+        if (error instanceof AppError) throw error;
+        console.log(error)
+        throw new AppError('Something went wrong', StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
+
 module.exports = {
     createUser,
     login,
-    isAuthenticated
+    isAuthenticated,
+    addRoleToUser,
+    isAdmin
 }

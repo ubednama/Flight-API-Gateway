@@ -37,7 +37,19 @@ async function authUser(req, res, next) {
     }
 }
 
+async function isAdmin(req, res, next) {
+    const response = await UserService.isAdmin(req.user);
+    console.log(response)
+    if(!response) {
+        return res
+            .status(StatusCodes.UNAUTHORIZED)
+            .json({message: "Unauthorized to perform action"})
+    }
+    next();
+}
+
 module.exports = {
     validateAuthRequest,
-    authUser
+    authUser,
+    isAdmin
 }
